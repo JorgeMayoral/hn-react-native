@@ -1,45 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from './screens/HomeScreen';
 
-export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState(null);
+const Stack = createStackNavigator();
 
-  const getNews = async () => {
-    const API_URL = 'https://api.hackerwebapp.com/news';
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    setNews(data);
-    setLoading(false);
-  };
-
-  const renderItem = ({ item }) => <Text>{item.title}</Text>;
-
-  useEffect(() => {
-    getNews();
-  }, []);
-
+function App() {
   return (
-    <View style={styles.container}>
-      {loading && <Text>Open up App.js to start working on your app!</Text>}
-      {news && (
-        <FlatList
-          data={news}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
-      )}
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
