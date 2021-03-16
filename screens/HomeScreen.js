@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import EntryCard from '../components/EntryCard';
 
 const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,7 @@ const HomeScreen = () => {
     setLoading(false);
   };
 
-  const renderItem = ({ item }) => <Text>{item.title}</Text>;
+  const renderItem = ({ item }) => <EntryCard data={item} />;
 
   useEffect(() => {
     getNews();
