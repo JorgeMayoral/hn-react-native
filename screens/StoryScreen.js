@@ -41,7 +41,7 @@ const StoryScreen = ({ route }) => {
             {story?.score ? story.score.toString() : '0'} points
           </Text>
           <Text style={styles.stats}>
-            {story?.descendants ? story.descendants.toString() : '0'} comments
+            {story?.kids?.length ? story.kids?.length.toString() : '0'} comments
           </Text>
         </View>
         <View>

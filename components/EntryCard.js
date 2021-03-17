@@ -1,17 +1,27 @@
 import React from 'react';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Button,
+  TouchableHighlight,
+  TouchableNativeFeedback,
+} from 'react-native';
 
 const EntryCard = ({ data, callback }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.timeAgo}>{data.time_ago}</Text>
-      <Text style={styles.title}>{data.title}</Text>
-      <View style={styles.entryFooter}>
-        <Text>{data.points || 0} points</Text>
-        <Text>{data.comments_count} comments</Text>
+    <TouchableNativeFeedback onPress={() => callback(data.id)}>
+      <View style={styles.container}>
+        <View>
+          <Text style={styles.timeAgo}>{data.time}</Text>
+          <Text style={styles.title}>{data.title}</Text>
+          <View style={styles.entryFooter}>
+            <Text>{data.score || 0} points</Text>
+            <Text>{data.kids.length} comments</Text>
+          </View>
+        </View>
       </View>
-      <Button onPress={() => callback(data.id)} title="See" />
-    </View>
+    </TouchableNativeFeedback>
   );
 };
 

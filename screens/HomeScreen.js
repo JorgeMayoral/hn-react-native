@@ -1,18 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import EntryCard from '../components/EntryCard';
 import LoadingComponent from '../components/LoadingComponent';
 
 const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState(null);
+  const [news, setNews] = useState([]);
 
   const getNews = async () => {
-    const API_URL = 'https://api.hackerwebapp.com/news';
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    setNews(data);
+    const API_URL = 'https://hacker-news.firebaseio.com/v0';
+    const idsResponse = await fetch(`${API_URL}/beststories.json`);
+    const allIds = await idsResponse.json();
+    const allStories = [];
+    for (let id of allIds) {
+      const response = await fetch(`${API_URL}/item/${id}.json`);
+      const data = await response.json();
+      allStories.push(data);
+    }
+    setNews(allStories);
     setLoading(false);
   };
 
