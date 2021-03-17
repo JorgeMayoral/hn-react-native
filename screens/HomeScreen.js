@@ -2,8 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import EntryCard from '../components/EntryCard';
+import LoadingComponent from '../components/LoadingComponent';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [news, setNews] = useState(null);
 
@@ -15,15 +16,23 @@ const HomeScreen = () => {
     setLoading(false);
   };
 
-  const renderItem = ({ item }) => <EntryCard data={item} />;
+  const renderItem = ({ item }) => (
+    <EntryCard
+      data={item}
+      callback={(id) => navigation.navigate('Story', { storyId: id })}
+    />
+  );
 
   useEffect(() => {
     getNews();
   }, []);
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
   return (
     <View style={styles.container}>
-      {loading && <Text>Loading...</Text>}
       {news && (
         <FlatList
           data={news}
