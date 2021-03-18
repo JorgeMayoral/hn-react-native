@@ -1,25 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View, Button } from 'react-native';
 import EntryCard from '../components/EntryCard';
 import LoadingComponent from '../components/LoadingComponent';
+import fetchNewsIds from '../services/fetchNewsIds';
+import fetchStory from '../services/fetchStory';
 
 const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [news, setNews] = useState([]);
+  const [lastStory, setLastStory] = useState(0);
+  const [allIds, setAllIds] = useState([]);
+  const [moreLoading, setMoreLoading] = useState(false);
 
   const getNews = async () => {
-    const API_URL = 'https://hacker-news.firebaseio.com/v0';
-    const idsResponse = await fetch(`${API_URL}/beststories.json`);
-    const allIds = await idsResponse.json();
-    const allStories = [];
-    for (let id of allIds) {
-      const response = await fetch(`${API_URL}/item/${id}.json`);
-      const data = await response.json();
-      allStories.push(data);
+    setMoreLoading(true);
+    const storiesIds = await fetchNewsIds();
+    setAllIds(storiesIds);
+    const fetchedStories = [];
+    for (let i = lastStory; i < lastStory + 10; i++) {
+      const data = await fetchStory(allIds[i]);
+      fetchedStories.push(data);
     }
-    setNews(allStories);
+    setNews([...news, ...fetchedStories]);
+    setLastStory((prev) => prev + 10);
     setLoading(false);
+    setMoreLoading(false);
+  };
+
+  const LoadMore = () => {
+    return (
+      <Button
+        onPress={getNews}
+        title={moreLoading ? 'Loading...' : 'Load more'}
+        disabled={moreLoading}
+      />
+    );
   };
 
   const renderItem = ({ item }) => (
@@ -43,7 +59,8 @@ const HomeScreen = ({ navigation }) => {
         <FlatList
           data={news}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item?.id.toString()}
+          ListFooterComponent={lastStory < 500 ? <LoadMore /> : null}
         />
       )}
       <StatusBar style="auto" />
