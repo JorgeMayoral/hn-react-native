@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 
 const LoadingComponent = () => {
   return (
     <View style={styles.container}>
       <Text>Loading...</Text>
+      <ActivityIndicator size="large" color="#adb05" />
     </View>
   );
 };

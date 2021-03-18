@@ -1,6 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View, Button } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  View,
+  Button,
+  ActivityIndicator,
+} from 'react-native';
 import EntryCard from '../components/EntryCard';
 import LoadingComponent from '../components/LoadingComponent';
 import fetchNewsIds from '../services/fetchNewsIds';
@@ -19,8 +25,13 @@ const HomeScreen = ({ navigation }) => {
     setAllIds(storiesIds);
     const fetchedStories = [];
     for (let i = lastStory; i < lastStory + 10; i++) {
-      const data = await fetchStory(allIds[i]);
-      fetchedStories.push(data);
+      if (lastStory === 0) {
+        const data = await fetchStory(storiesIds[i]);
+        fetchedStories.push(data);
+      } else {
+        const data = await fetchStory(allIds[i]);
+        fetchedStories.push(data);
+      }
     }
     setNews([...news, ...fetchedStories]);
     setLastStory((prev) => prev + 10);
@@ -29,7 +40,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const LoadMore = () => {
-    return (
+    return moreLoading ? (
+      <ActivityIndicator color="#adb05" />
+    ) : (
       <Button
         onPress={getNews}
         title={moreLoading ? 'Loading...' : 'Load more'}
