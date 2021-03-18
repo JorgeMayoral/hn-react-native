@@ -1,23 +1,19 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Button,
-  TouchableHighlight,
-  TouchableNativeFeedback,
-} from 'react-native';
+import { StyleSheet, View, Text, TouchableNativeFeedback } from 'react-native';
 
 const EntryCard = ({ data, callback }) => {
+  const time = new Date(data?.time * 1000);
+
   return (
-    <TouchableNativeFeedback onPress={() => callback(data.id)}>
+    // TouchableNativeFeedback only works on Android
+    <TouchableNativeFeedback onPress={() => callback()}>
       <View style={styles.container}>
         <View>
-          <Text style={styles.timeAgo}>{data.time}</Text>
-          <Text style={styles.title}>{data.title}</Text>
+          <Text style={styles.timeAgo}>{time.toLocaleDateString('en-GB')}</Text>
+          <Text style={styles.title}>{data?.title}</Text>
           <View style={styles.entryFooter}>
-            <Text>{data.score || 0} points</Text>
-            <Text>{data.kids.length} comments</Text>
+            <Text>{data?.score || 0} points</Text>
+            <Text>{data?.kids.length} comments</Text>
           </View>
         </View>
       </View>

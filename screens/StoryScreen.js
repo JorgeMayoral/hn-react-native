@@ -1,31 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+  StatusBar,
+} from 'react-native';
 import LoadingComponent from '../components/LoadingComponent';
 import { FlatList } from 'react-native-gesture-handler';
+import fetchItem from '../services/fetchItem';
+import CommentCard from '../components/CommentCard';
+import Separator from '../components/Separator';
+import ReadStoryButton from '../components/ReadStoryButton';
 
 const StoryScreen = ({ route }) => {
   const [story, setStory] = useState({});
   const [loading, setLoading] = useState(true);
-  const { storyId } = route.params;
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(true);
+  const { item } = route.params;
+  const time = new Date(story?.time * 1000).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
-  const fetchStory = async () => {
-    const response = await fetch(
-      `https://hacker-news.firebaseio.com/v0/item/${storyId}.json`,
-    );
-    const data = await response.json();
-    setStory(data);
+  const getComments = async () => {
+    setCommentsLoading(true);
+    const fetchedComments = [];
+    for (let commentId of story?.kids) {
+      const data = await fetchItem(commentId);
+      fetchedComments.push(data);
+    }
+    setComments(fetchedComments);
   };
 
-  const handleOpen = () => {
-    WebBrowser.openBrowserAsync(story.url);
+  const renderItem = ({ item }) => {
+    return <CommentCard data={item} />;
   };
 
   useEffect(() => {
     setLoading(true);
-    fetchStory();
+    if (story.kids) {
+      setCommentsLoading(true);
+      getComments();
+      setCommentsLoading(false);
+    }
+    setStory(item);
     setLoading(false);
-  }, []);
+  }, [story]);
 
   if (loading) {
     return <LoadingComponent />;
@@ -35,24 +58,40 @@ const StoryScreen = ({ route }) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>{story?.title}</Text>
-        <View>
+        <View style={styles.column}>
           <Text>By: {story.by}</Text>
-          <Text style={styles.stats}>
-            {story?.score ? story.score.toString() : '0'} points
-          </Text>
-          <Text style={styles.stats}>
+          <Text>{story?.score ? story.score.toString() : '0'} points</Text>
+        </View>
+        <View style={styles.column}>
+          <Text>{time}</Text>
+          <Text>
             {story?.kids?.length ? story.kids?.length.toString() : '0'} comments
           </Text>
         </View>
-        <View>
-          <Text>Comments</Text>
+        <View style={styles.buttonContainer}>
+          {story?.url && (
+            <ReadStoryButton
+              title="Read Story"
+              url={story.url}
+              style={styles.readButton}
+            />
+          )}
+          <Separator />
+        </View>
+        <View style={styles.commentsContainer}>
+          {commentsLoading ? (
+            <ActivityIndicator color="#adb05" size="large" />
+          ) : (
+            <FlatList
+              data={comments}
+              renderItem={renderItem}
+              keyExtractor={(item) => item?.id.toString()}
+              ItemSeparatorComponent={Separator}
+              ListEmptyComponent={LoadingComponent}
+            />
+          )}
         </View>
       </View>
-      <Button
-        title="Read Story"
-        onPress={handleOpen}
-        style={styles.readButton}
-      />
     </View>
   );
 };
@@ -64,12 +103,12 @@ const styles = StyleSheet.create({
     height: '100%',
     display: 'flex',
   },
+  buttonContainer: {
+    alignItems: 'center',
+    elevation: 5,
+  },
   content: {
     flex: 1,
-  },
-  readButton: {
-    bottom: 0,
-    marginHorizontal: 0,
   },
   title: {
     textAlign: 'center',
@@ -77,8 +116,12 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginBottom: 25,
   },
-  stats: {
-    textAlign: 'right',
+  commentsContainer: {
+    flex: 1,
+  },
+  column: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 

@@ -1,16 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  View,
-  Button,
-  ActivityIndicator,
-} from 'react-native';
+import { FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import EntryCard from '../components/EntryCard';
 import LoadingComponent from '../components/LoadingComponent';
 import fetchNewsIds from '../services/fetchNewsIds';
-import fetchStory from '../services/fetchStory';
+import fetchItem from '../services/fetchItem';
 
 const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -26,10 +20,10 @@ const HomeScreen = ({ navigation }) => {
     const fetchedStories = [];
     for (let i = lastStory; i < lastStory + 10; i++) {
       if (lastStory === 0) {
-        const data = await fetchStory(storiesIds[i]);
+        const data = await fetchItem(storiesIds[i]);
         fetchedStories.push(data);
       } else {
-        const data = await fetchStory(allIds[i]);
+        const data = await fetchItem(allIds[i]);
         fetchedStories.push(data);
       }
     }
@@ -40,21 +34,13 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const LoadMore = () => {
-    return moreLoading ? (
-      <ActivityIndicator color="#adb05" />
-    ) : (
-      <Button
-        onPress={getNews}
-        title={moreLoading ? 'Loading...' : 'Load more'}
-        disabled={moreLoading}
-      />
-    );
+    return moreLoading ? <ActivityIndicator color="#00adb5" /> : null;
   };
 
   const renderItem = ({ item }) => (
     <EntryCard
       data={item}
-      callback={(id) => navigation.navigate('Story', { storyId: id })}
+      callback={() => navigation.navigate('Story', { item })}
     />
   );
 
@@ -74,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
           renderItem={renderItem}
           keyExtractor={(item) => item?.id.toString()}
           ListFooterComponent={lastStory < 500 ? <LoadMore /> : null}
+          onEndReached={getNews}
         />
       )}
       <StatusBar style="auto" />
