@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import LoadingComponent from '../components/LoadingComponent';
 import { FlatList } from 'react-native-gesture-handler';
 import fetchItem from '../services/fetchItem';
@@ -18,7 +12,10 @@ const StoryScreen = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
+  const [lastComment, setLastComment] = useState(0);
+  const [moreLoading, setMoreLoading] = useState(false);
   const { item } = route.params;
+
   const time = new Date(story?.time * 1000).toLocaleString('en-GB', {
     day: 'numeric',
     month: 'long',
@@ -26,13 +23,15 @@ const StoryScreen = ({ route }) => {
   });
 
   const getComments = async () => {
-    setCommentsLoading(true);
+    setMoreLoading(true);
     const fetchedComments = [];
-    for (let commentId of story?.kids) {
-      const data = await fetchItem(commentId);
+    for (let i = lastComment; i < lastComment + 10; i++) {
+      const data = await fetchItem(story.kids[i]);
       fetchedComments.push(data);
     }
-    setComments(fetchedComments);
+    setLastComment((prev) => prev + 10);
+    setComments([...comments, ...fetchedComments]);
+    setMoreLoading(false);
   };
 
   const renderItem = ({ item }) => {
@@ -88,6 +87,10 @@ const StoryScreen = ({ route }) => {
               keyExtractor={(item) => item?.id.toString()}
               ItemSeparatorComponent={Separator}
               ListEmptyComponent={LoadingComponent}
+              onEndReached={getComments}
+              ListFooterComponent={
+                moreLoading && <ActivityIndicator color="#00adb5" />
+              }
             />
           )}
         </View>
